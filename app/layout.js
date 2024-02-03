@@ -3,6 +3,8 @@ import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 const inter = Inter({ subsets: ["latin"] });
 
+
+
 export const metadata = {
   title: "GPTGenius",
   description: "GPTGenius: Your AI language companion. Powered by OpenAI, it enhances your conversations, content creation, and more!",

@@ -6,7 +6,7 @@ const TourInfo = ({ tour }) => {
     console.log(`Title:${title}\nDescription:${description}\nStops:${stops}\n end`);
     return (
         <div className='max-w-2xl'>
-            <h1 className='text-4xl font-semibold mb-4'>title: {title}</h1>
+            <h1 className='text-4xl font-semibold mb-4'>{title}</h1>
             <p className='leading-loose mb-6'>{description}</p>
             <ul>
                 {Array.isArray(stops) && stops.map((stop) => {

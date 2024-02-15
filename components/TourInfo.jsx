@@ -1,8 +1,6 @@
 const TourInfo = ({ tour }) => {
-    if (!tour) {
-        return null;
-    }
-    const { title, description, stops } = tour.tour;
+    const { title, description, stops } = tour;
+
     console.log(`Title:${title}\nDescription:${description}\nStops:${stops}\n end`);
     return (
         <div className='max-w-2xl'>

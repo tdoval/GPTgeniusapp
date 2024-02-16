@@ -1,6 +1,7 @@
 'use server'
 import OpenAI from 'openai'
 import prisma from './db';
+import { revalidatePath } from 'next/cache';
 
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY
@@ -16,8 +17,12 @@ export const generateChatResponse = async (chatMessages) => {
             ],
             model: 'gpt-3.5-turbo',
             temperature: 0.3,
+            max_tokens: 200
         });
-        return response.choices[0].message;
+        return {
+            message: response.choices[0].message,
+            tokens: response.usage.total_tokens
+        }
     } catch (error) {
         console.error(error)
         return null;
@@ -56,8 +61,8 @@ export const generateTourResponse = async ({ city, country }) => {
         if (!tourData.tour) {
             return null;
         }
-        // return { tour: tourData.tour, tokens: response.usage.total_tokens };
-        return tourData.tour;
+        return { tour: tourData.tour, tokens: response.usage.total_tokens };
+        // return tourData.tour;
     } catch (error) {
         console.log(error);
         return null;
@@ -132,4 +137,46 @@ export const generateTourImage = async ({ city, country }) => {
         console.error(error);
         return null;
     }
-}
+};
+
+export const fetchUserTokensById = async (clerkId) => {
+    const result = await prisma.token.findUnique({
+        where: {
+            clerkId
+        }
+    });
+    return result?.tokens;
+};
+
+export const generateUserTokensForId = async (clerkId) => {
+    const result = await prisma.token.create({
+        data: {
+            clerkId
+        }
+    });
+
+    return result?.tokens;
+};
+
+export const fetchOrGenerateTokens = async (clerkId) => {
+    const result = await fetchUserTokensById(clerkId);
+    if (result) {
+        return result.tokens;
+    }
+    return (await generateUserTokensForId(clerkId)).tokens
+};
+
+export const subtractTokens = async (clerkId, tokens) => {
+    const result = await prisma.token.update({
+        where: {
+            clerkId
+        },
+        data: {
+            tokens: {
+                decrement: tokens
+            },
+        },
+    });
+    revalidatePath('/profile');
+    return result.tokens;
+};
